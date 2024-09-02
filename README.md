@@ -19,6 +19,8 @@ To set up Squid Proxy on Windows, follow these steps:
 
 ### 1.2 Configuring Squid to Listen on Port 1080
 
+1080 is the standard local port on which shadowsocks runs. if you have another one, put your own
+
 1. Locate the Squid configuration file, typically found in `C:\Squid\etc\squid.conf`.
 2. Open `squid.conf` in a text editor (with administrator privileges).
 3. Find the line that starts with `http_port` and change the port number to `1080`, so it reads:
