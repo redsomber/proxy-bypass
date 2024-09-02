@@ -9,6 +9,10 @@ To set up Squid Proxy on Windows, follow these steps:
 ### 1.1 Installing Squid
 
 1. Download the Squid installer for Windows from a reliable source.
+   The official app for windows
+   <https://squid.diladele.com/>
+   You need `SQUID FOR WINDOWS` -> `DOWNLOAD MSI`
+
 2. Follow the installation wizard to install Squid on your machine.
 
 ### 1.2 Configuring Squid to Listen on Port 1080
