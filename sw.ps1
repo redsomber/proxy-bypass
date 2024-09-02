@@ -1,10 +1,10 @@
-$server = "123.123.123.123"
+$server = "111.111.111.111"
 $squidService = "squidsrv"
 $shadowsocksProcess = "Shadowsocks"
 $shadowsocksPath = "C:\Program Files\Shadowsocks\Shadowsocks.exe"
-$interval = 0
+$interval = 1
 $pollCount = 2
-$logFile = "D:\logfile.txt"
+$logFile = "C:\logfile.txt"
 
 # Function to log messages
 function Write-Log {
@@ -29,24 +29,10 @@ function Write-Console {
 
 # Function to check if the server is online
 function Test-ServerConnection {
-    param (
-        [int]$count = $pollCount
-    )
-    $successCount = 0
-
-    for ($i = 1; $i -le $count; $i++) {
-        try {
-            Test-Connection -ComputerName $server -Count 1 -ErrorAction Stop
-            $successCount++
-        } catch {
-            Write-Log "Attempt $i of $count to reach $server failed."
-        }
-        Start-Sleep -Seconds 1  # Sleep 1 second between each attempt
-    }
-
-    if ($successCount -eq $count) {
+    try {
+        Test-Connection -ComputerName $server -Count 1 -ErrorAction Stop
         return $true
-    } else {
+    } catch {
         return $false
     }
 }
@@ -95,7 +81,20 @@ function Start-ShadowsocksIfNotRunning {
 }
 
 while ($true) {
-    $serverOnline = Test-ServerConnection
+    # Perform the server connection test multiple times
+    $successfulTests = 0
+    for ($i = 1; $i -le $pollCount; $i++) {
+        if (Test-ServerConnection) {
+            $successfulTests++
+            if ($successfulTests -ge 1) {
+                break  # Exit early if at least one test is successful
+            }
+        } else {
+        Write-Console "$i test failed"
+        }
+    }
+
+    $serverOnline = $successfulTests -gt 0
     $shadowsocksRunning = Get-Process -Name $shadowsocksProcess -ErrorAction SilentlyContinue
 
     if ($serverOnline) {
@@ -107,7 +106,7 @@ while ($true) {
                 $serverOnline = Test-ServerConnection
                 if ($serverOnline) {
                     Stop-ServiceIfRunning -serviceName $squidService
-                    Start-Sleep -Seconds 1
+                    Start-Sleep -Seconds 3
                     Start-ShadowsocksIfNotRunning
                 } else {
                     Write-Log "Server $server went offline during the switch attempt"
@@ -124,5 +123,6 @@ while ($true) {
         Stop-ProcessIfRunning -processName $shadowsocksProcess
         Start-ServiceIfNotRunning -serviceName $squidService
     }
+
     Start-Sleep -Seconds $interval
 }
